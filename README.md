@@ -24,6 +24,16 @@ This is not meant to be a replacement for a proper graphing utility or GUI visua
 
 To install using PGXS: `make install`. Or you can manually install: `cp pg_bargraph* /your/extensions/dir/` Or, you can create the functions directly (not recommended): `cat pg_bargraph--1.0.sql | psql ...`.
 
+```
+graph(vals: double[], graph_width?: int) → table(val double, graph text)
+graph(inputs: graph_input[], graph_width?: int) → table(label text, val double, graph text)
+graph(width: double) → text
+graph(val: double, max: double, graph_width?: int) → text
+graph(val: double, min: double, max: double, graph_width?: int) → text
+
+type graph_input → (label text, val double)
+```
+
 --------------------------------
 
 
@@ -71,8 +81,6 @@ select (graph(array_agg(val), 20)).* from data;
 --------------------------------
 
 `graph(inputs: graph_input[], graph_width?: int) → table(label text, val double, graph text)`
-
-`type graph_input = (label text, val double)`
 
 Same as above, but accepts label and value tuples.
 
