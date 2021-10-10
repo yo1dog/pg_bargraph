@@ -22,7 +22,7 @@ select * from graph('{5.5,10,15,13,8,3.1,-1,2,5,7,4}'::FLOAT[]);
 
 This is not meant to be a replacement for a proper graphing utility or GUI visualizer. I find it useful when I want to quickly visually compare data sets from the CLI when it otherwise would not be worth the time.
 
-To install using PGXS: `make install`. Or you can manually install: `cp pg_bargraph* /your/extensions/dir/` Or, you can create the functions directly (not recommended): `cat pg_bargraph--1.0.sql | psql ...`.
+To install using PGXS: `make install`. Or you can manually install: `cp pg_bargraph* /your/extensions/dir/` Or, you can create the functions directly (not recommended): `cat pg_bargraph*.sql | psql ...`.
 
 ```
 graph(vals: double[], graph_width?: int) → table(val double, graph text)
@@ -148,7 +148,7 @@ select name, val, graph(val, min, max) from data, (select min(val), max(val) fro
 
 --------------------------------
 
-The `graph(vals: double[], ...)` and `graph(inputs: graph_input[], ...)` are usually the easiest and safest to use due to the function handling the min and max calculations. However, the other variants allow for more customization. For example, here is how to use a logarithmic scale:
+The `graph(vals: double[], ...)` and `graph(inputs: graph_input[], ...)` variants are usually the easiest and safest to use due to the function handling the min and max calculations. However, the other variants allow for more customization. For example, here is how to use a logarithmic scale:
 
 ```
 with data(val) as (values (100),(200),(300))

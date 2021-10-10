@@ -22,8 +22,10 @@ CREATE OR REPLACE FUNCTION graph_neg (
   lpad INT
 ) RETURNS TEXT
 AS $$
-SELECT
-  CASE WHEN width < 0 THEN
+SELECT CASE
+  WHEN lpad < 0 THEN NULL
+  WHEN ceil(-width) > lpad THEN NULL
+  WHEN width < 0 THEN (
     repeat(' ', lpad - ceil(-width)::INT) ||
     CASE
       WHEN ceil(width) - width = 0 THEN ''
@@ -32,7 +34,8 @@ SELECT
       ELSE '█'
     END ||
     repeat('█', floor(-width)::INT)
-  ELSE
+  )
+  ELSE (
     repeat(' ', lpad) ||
     repeat('█', floor(width)::INT) ||
     CASE
@@ -40,19 +43,8 @@ SELECT
       WHEN width - floor(width) < 0.75 THEN '▌'
       ELSE '█'
     END
-  END
-$$
-LANGUAGE SQL
-IMMUTABLE
-RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION graph (
-  val DOUBLE PRECISION,
-  max DOUBLE PRECISION,
-  graph_width INT DEFAULT 50
-) RETURNS TEXT
-AS $$
-SELECT graph((val/max::DOUBLE PRECISION)*graph_width)
+  )
+END
 $$
 LANGUAGE SQL
 IMMUTABLE
@@ -66,8 +58,19 @@ CREATE OR REPLACE FUNCTION graph (
 ) RETURNS TEXT
 AS $$
 SELECT CASE
-  WHEN min < 0 THEN graph_neg((val/(max - min)::DOUBLE PRECISION)*graph_width, ceil((-min/(max - min)::DOUBLE PRECISION)*graph_width)::INT)
-  ELSE graph((val/max::DOUBLE PRECISION)*graph_width)
+  WHEN val < min THEN NULL
+  WHEN val > max THEN NULL
+  WHEN min = 0 AND max = 0 THEN ''
+  WHEN graph_width < 0 THEN NULL
+  WHEN min >= 0 THEN graph((val/max::DOUBLE PRECISION)*graph_width)
+  WHEN max < 0 THEN graph_neg(
+    (val/-min::DOUBLE PRECISION)*graph_width,
+    graph_width
+  )
+  ELSE graph_neg(
+          (val/(max - min)::DOUBLE PRECISION)*graph_width,
+    ceil(-(min/(max - min)::DOUBLE PRECISION)*graph_width)::INT
+  )
 END
 $$
 LANGUAGE SQL
